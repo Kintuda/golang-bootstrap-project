@@ -13,13 +13,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func Run() error {
-	runCommand := &cobra.Command{
-		Use:   "appname",
-		Short: "start appname API",
-		RunE:  startCmd,
-	}
+var runCommand = &cobra.Command{
+	Use:   "appname",
+	Short: "start appname API",
+	RunE:  startCmd,
+}
 
+func Run() error {
 	return runCommand.Execute()
 }
 
