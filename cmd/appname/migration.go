@@ -1,73 +1,157 @@
 package cmd
 
 import (
-	"database/sql"
-	"errors"
+	"fmt"
+	"log"
+	"os"
+	"path/filepath"
+	"strconv"
+	"strings"
 
+	"github.com/Kintuda/golang-bootstrap-project/app"
 	"github.com/Kintuda/golang-bootstrap-project/config"
-	env "github.com/Netflix/go-env"
-	"github.com/go-playground/validator/v10"
-	"github.com/golang-migrate/migrate/v4"
-	"github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
-	"github.com/joho/godotenv"
 	"github.com/spf13/cobra"
 )
 
-var MigrationCommand = &cobra.Command{
-	Use: "migration",
+var (
+	MigrationCmd = &cobra.Command{
+		Use: "migration",
+	}
+	migrateUp = &cobra.Command{
+		Use:  "up",
+		RunE: migrationUp,
+	}
+	migrateDown = &cobra.Command{
+		Use:  "down",
+		RunE: migrationDown,
+	}
+	createMigrationFile = &cobra.Command{
+		RunE: createMigration,
+		Use:  "create",
+		Args: cobra.MinimumNArgs(1),
+	}
+	migrationDir string
+)
+
+func init() {
+	MigrationCmd.PersistentFlags().StringVarP(&migrationDir, "migration-dir", "m", "", "directory that holds the migration files")
+	MigrationCmd.AddCommand(migrateUp, migrateDown, createMigrationFile)
 }
 
-var CreateMigrationCommand = &cobra.Command{
-	Use:  "create",
-	RunE: CreateMigration,
-}
+func createMigration(cmd *cobra.Command, args []string) error {
+	var migrationName = strings.Join(args, "_")
+	var revision int64 = 1
+	var initialMigration = false
 
-func Init() {
-	migrationCommand.AddCommand(CreateMigration())
-}
+	migrationDirectory := filepath.Clean(migrationDir)
+	migrationFiles, err := filepath.Glob(filepath.Join(migrationDirectory, "*.sql"))
 
-func CreateMigration(cmd *cobra.Command, arg []string) error {
-	var cfg config.DatabaseConfig
-	var err error
-
-	if err := godotenv.Load(); err != nil {
-		return errors.New("error while loading .env file")
+	if err != nil {
+		return err
+	}
+	fmt.Println(len(migrationFiles) <= 0)
+	if len(migrationFiles) <= 0 {
+		initialMigration = true
 	}
 
-	_, err = env.UnmarshalFromEnviron(&cfg)
+	if !initialMigration {
+		lastMigration := migrationFiles[len(migrationFiles)-1]
+		baseFileName := filepath.Base(lastMigration)
+		fileRevision := strings.Index(baseFileName, "_")
+
+		revisionString := baseFileName[0:fileRevision]
+		nextRevision, err := strconv.ParseInt(revisionString, 10, 64)
+
+		if err != nil {
+			return err
+		}
+
+		nextRevision++
+		revision = int64(nextRevision)
+		fmt.Println(revision)
+	}
+
+	migrationName = strings.ReplaceAll(strings.ToLower(migrationName), " ", "_")
+
+	for _, direction := range []string{"up", "down"} {
+		fmt.Println(strconv.FormatInt(revision, 10))
+		basename := fmt.Sprintf("%s_%s.%s%s", strconv.FormatInt(revision, 10), migrationName, direction, ".sql")
+		filename := filepath.Join(migrationDirectory, basename)
+
+		if err = createFile(filename); err != nil {
+			return err
+		}
+
+		absPath, _ := filepath.Abs(filename)
+		fmt.Println(absPath)
+	}
+
+	return nil
+}
+
+func createFile(filename string) error {
+	f, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE|os.O_EXCL, 0666)
 
 	if err != nil {
 		return err
 	}
 
-	validate := validator.New()
+	return f.Close()
+}
 
-	if err := validate.Struct(cfg); err != nil {
-		return err
-	}
-
-	db, err := sql.Open("postgres", cfg.Dns)
+func migrationUp(cmd *cobra.Command, arg []string) error {
+	cfg, err := config.LoadDatabaseCredentialsFromEnv()
 
 	if err != nil {
 		return err
 	}
 
-	driver, err := postgres.WithInstance(db, &postgres.Config{})
+	m, err := app.NewMigrator(cfg, migrationDir)
+
+	defer func() {
+		if _, err := m.Engine.Close(); err != nil {
+			log.Fatal(err)
+		}
+	}()
 
 	if err != nil {
-		return nil
+		return err
 	}
 
-	m, err := migrate.NewWithDatabaseInstance(
-		"file:///db/migrations",
-		"postgres", driver)
+	if err := m.Engine.Up(); err != nil {
+		return err
+	}
+
+	fmt.Println("Migration up ran successfully")
+
+	return nil
+}
+
+func migrationDown(cmd *cobra.Command, arg []string) error {
+	cfg, err := config.LoadDatabaseCredentialsFromEnv()
 
 	if err != nil {
-		return nil
+		return err
 	}
 
-	m.Steps(2)
+	m, err := app.NewMigrator(cfg, migrationDir)
+
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		if _, err := m.Engine.Close(); err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	if err := m.Engine.Down(); err != nil {
+		return err
+	}
+
+	fmt.Println("Migration down ran successfully")
 
 	return nil
 }
