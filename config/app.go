@@ -18,7 +18,8 @@ type ApplicationConfig struct {
 }
 
 type RuntimeConfig struct {
-	Env string `env:"ENV" validate:"required"`
+	Env      string `env:"ENV" validate:"required"`
+	HttpPort string `env:"HTTP_PORT" validate:"required"`
 }
 
 type DatabaseConfig struct {

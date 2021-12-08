@@ -39,7 +39,7 @@ func NewServer(database *db.DatabaseConnection, cfg *config.ApplicationConfig) *
 	s.SetupLogging()
 
 	s.Server = &http.Server{
-		Addr:    os.Getenv("APP_PORT"),
+		Addr:    cfg.Runtime.HttpPort,
 		Handler: s.Router,
 	}
 
