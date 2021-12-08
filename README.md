@@ -12,8 +12,10 @@
 
 - Gin for routing
 - pgx for database driver (postgresql)
-- go-migrate for handling migration
+- go-migrate for handling migrations
 - zap for logging 
+- go-env for configuring environment variables
+- cobra for cli
 
 ### How to configure application
 
@@ -31,10 +33,12 @@ HTTP_PORT=:3000
 
 - go run main.go server
 
-#### Migration related commads
+#### Migration related commands
 
-Creating a migration file (should follow the go-migrate guidelines)
+Script already calculate the revision number, and format the file to
+
+How to create a migration file (should follow the go-migrate guidelines for migration name)
 - go run main.go migration create initial migration -m /Users/appname/Projects/Golang/golang-bootstrap-project/db/migrations/
 
-Running up migration 
+Running migration up 
 - go run main.go migration down -m /Users/appname/Projects/Golang/golang-bootstrap-project/db/migrations/
