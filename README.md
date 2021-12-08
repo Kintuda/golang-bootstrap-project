@@ -1,5 +1,13 @@
 # golang-bootstrap-project
 
+### TODO
+
+- Create unit test and the required scripts to run
+- Add oauth2 module
+- Add service and repository layers
+- Add dockerfile and docker-compose files
+- Add pipeline for build and lint
+
 ### Technologies and frameworks used in this template
 
 - Gin for routing
