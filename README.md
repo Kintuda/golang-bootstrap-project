@@ -35,7 +35,7 @@ HTTP_PORT=:3000
 
 #### Migration related commands
 
-Script already calculate the revision number, and format the file to
+Script already generate a new revision number 
 
 How to create a migration file (should follow the go-migrate guidelines for migration name)
 - go run main.go migration create initial migration -m /Users/appname/Projects/Golang/golang-bootstrap-project/db/migrations/
