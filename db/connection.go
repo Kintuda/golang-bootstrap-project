@@ -4,15 +4,35 @@ import (
 	"context"
 
 	"github.com/Kintuda/golang-bootstrap-project/config"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v4/log/zapadapter"
+	"github.com/jackc/pgx/v4/pgxpool"
+	"go.uber.org/zap"
 )
 
 type DatabaseConnection struct {
-	conn *pgx.Conn
+	conn *pgxpool.Pool
 }
 
 func NewDatabaseConnection(c *config.DatabaseConfig) (*DatabaseConnection, error) {
-	conn, err := pgx.Connect(context.Background(), c.Dns)
+	var err error
+
+	config, err := pgxpool.ParseConfig(c.Dns)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if c.Debug {
+		logger, err := zap.NewProduction()
+
+		if err != nil {
+			return nil, err
+		}
+
+		config.ConnConfig.Logger = zapadapter.NewLogger(logger)
+	}
+
+	conn, err := pgxpool.ConnectConfig(context.Background(), config)
 
 	if err != nil {
 		return nil, err
@@ -22,5 +42,5 @@ func NewDatabaseConnection(c *config.DatabaseConfig) (*DatabaseConnection, error
 }
 
 func (d *DatabaseConnection) CloseConnection() {
-	d.conn.Close(context.Background())
+	d.conn.Close()
 }

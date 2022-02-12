@@ -23,7 +23,8 @@ type RuntimeConfig struct {
 }
 
 type DatabaseConfig struct {
-	Dns string `env:"DATABASE_URL" validate:"required"`
+	Dns   string `env:"DATABASE_URL" validate:"required"`
+	Debug bool   `env:"DATABASE_DEBUG"`
 }
 
 func LoadDatabaseCredentialsFromEnv() (*DatabaseConfig, error) {

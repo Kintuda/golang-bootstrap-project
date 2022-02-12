@@ -6,7 +6,6 @@ import (
 	"github.com/Kintuda/golang-bootstrap-project/app"
 	"github.com/Kintuda/golang-bootstrap-project/config"
 	"github.com/Kintuda/golang-bootstrap-project/db"
-	v1 "github.com/Kintuda/golang-bootstrap-project/v1"
 	env "github.com/Netflix/go-env"
 	"github.com/go-playground/validator/v10"
 	"github.com/joho/godotenv"
@@ -46,7 +45,7 @@ func startCmd(cmd *cobra.Command, arg []string) error {
 	}
 
 	server := app.NewServer(db, &cfg)
-	v1.NewAPI(server)
+	app.NewAPI(server)
 
 	if err != nil {
 		return err
