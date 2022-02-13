@@ -1,15 +1,8 @@
 package config
 
 import (
-	"errors"
-
 	"github.com/Netflix/go-env"
-	"github.com/go-playground/validator/v10"
-	"github.com/joho/godotenv"
-)
-
-var (
-	errInvalidEnvFile = errors.New("error while loading .env file")
+	_ "github.com/joho/godotenv/autoload"
 )
 
 type ApplicationConfig struct {
@@ -18,29 +11,19 @@ type ApplicationConfig struct {
 }
 
 type RuntimeConfig struct {
-	Env      string `env:"ENV" validate:"required"`
-	HttpPort string `env:"HTTP_PORT" validate:"required"`
+	Env      string `env:"ENV,default=development"`
+	HttpPort string `env:"HTTP_PORT,default=:3000"`
 }
 
 type DatabaseConfig struct {
-	Dns   string `env:"DATABASE_URL" validate:"required"`
-	Debug bool   `env:"DATABASE_DEBUG"`
+	Dns   string `env:"DATABASE_URL,required=true"`
+	Debug bool   `env:"DATABASE_DEBUG,default=false"`
 }
 
-func LoadDatabaseCredentialsFromEnv() (*DatabaseConfig, error) {
-	var cfg DatabaseConfig
-
-	if err := godotenv.Load(); err != nil {
-		return nil, errInvalidEnvFile
-	}
+func LoadConfigFromEnv() (*ApplicationConfig, error) {
+	var cfg ApplicationConfig
 
 	if _, err := env.UnmarshalFromEnviron(&cfg); err != nil {
-		return nil, err
-	}
-
-	validate := validator.New()
-
-	if err := validate.Struct(cfg); err != nil {
 		return nil, err
 	}
 

@@ -101,13 +101,13 @@ func createFile(filename string) error {
 }
 
 func migrationUp(cmd *cobra.Command, arg []string) error {
-	cfg, err := config.LoadDatabaseCredentialsFromEnv()
+	cfg, err := config.LoadConfigFromEnv()
 
 	if err != nil {
 		return err
 	}
 
-	m, err := app.NewMigrator(cfg, migrationDir)
+	m, err := app.NewMigrator(&cfg.Database, migrationDir)
 
 	defer func() {
 		if _, err := m.Engine.Close(); err != nil {
@@ -129,13 +129,13 @@ func migrationUp(cmd *cobra.Command, arg []string) error {
 }
 
 func migrationDown(cmd *cobra.Command, arg []string) error {
-	cfg, err := config.LoadDatabaseCredentialsFromEnv()
+	cfg, err := config.LoadConfigFromEnv()
 
 	if err != nil {
 		return err
 	}
 
-	m, err := app.NewMigrator(cfg, migrationDir)
+	m, err := app.NewMigrator(&cfg.Database, migrationDir)
 
 	if err != nil {
 		return err
