@@ -10,7 +10,7 @@ import (
 )
 
 type DatabaseConnection struct {
-	conn *pgxpool.Pool
+	Conn *pgxpool.Pool
 }
 
 func NewDatabaseConnection(c *config.DatabaseConfig) (*DatabaseConnection, error) {
@@ -38,9 +38,9 @@ func NewDatabaseConnection(c *config.DatabaseConfig) (*DatabaseConnection, error
 		return nil, err
 	}
 
-	return &DatabaseConnection{conn: conn}, nil
+	return &DatabaseConnection{Conn: conn}, nil
 }
 
 func (d *DatabaseConnection) CloseConnection() {
-	d.conn.Close()
+	d.Conn.Close()
 }

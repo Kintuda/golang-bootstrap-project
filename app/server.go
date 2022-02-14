@@ -11,6 +11,7 @@ import (
 
 	"github.com/Kintuda/golang-bootstrap-project/config"
 	"github.com/Kintuda/golang-bootstrap-project/db"
+	"github.com/Kintuda/golang-bootstrap-project/middlewares"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
@@ -37,6 +38,7 @@ func NewServer(database *db.DatabaseConnection, cfg *config.ApplicationConfig) *
 	}
 
 	s.SetupLogging()
+	router.Use(middlewares.ErrorHandler(s.Logger))
 
 	s.Server = &http.Server{
 		Addr:    cfg.Runtime.HttpPort,
