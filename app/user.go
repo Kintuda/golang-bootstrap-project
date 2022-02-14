@@ -4,16 +4,18 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 )
 
 type CreateUser struct {
-	Name string `json:"name"`
+	FirstName string `json:"first_name" binding:"required"`
+	LastName  string `json:"last_name" binding:"required"`
 }
 
 func ValidateUser(c *gin.Context) {
-	var payload CreateUser
+	var payload = &CreateUser{}
 
-	if err := c.ShouldBindJSON(&payload); err != nil {
+	if err := c.ShouldBindBodyWith(payload, binding.JSON); err != nil {
 		c.AbortWithError(http.StatusUnprocessableEntity, err)
 		return
 	}

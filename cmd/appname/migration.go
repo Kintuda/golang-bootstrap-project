@@ -50,7 +50,7 @@ func createMigration(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(len(migrationFiles) <= 0)
+
 	if len(migrationFiles) <= 0 {
 		initialMigration = true
 	}
@@ -109,15 +109,15 @@ func migrationUp(cmd *cobra.Command, arg []string) error {
 
 	m, err := app.NewMigrator(&cfg.Database, migrationDir)
 
+	if err != nil {
+		return err
+	}
+
 	defer func() {
 		if _, err := m.Engine.Close(); err != nil {
 			log.Fatal(err)
 		}
 	}()
-
-	if err != nil {
-		return err
-	}
 
 	if err := m.Engine.Up(); err != nil {
 		return err

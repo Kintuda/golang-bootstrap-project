@@ -31,8 +31,6 @@ func NewServer(database *db.DatabaseConnection, cfg *config.ApplicationConfig) *
 
 	router := gin.Default()
 
-	router.Use(middlewares.ErrorHandler())
-
 	s := &Server{
 		Router: router,
 		DB:     database,
@@ -40,6 +38,7 @@ func NewServer(database *db.DatabaseConnection, cfg *config.ApplicationConfig) *
 	}
 
 	s.SetupLogging()
+	router.Use(middlewares.ErrorHandler(s.Logger))
 
 	s.Server = &http.Server{
 		Addr:    cfg.Runtime.HttpPort,
