@@ -1,0 +1,18 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-migrate
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: db-migrate
+          image: usr/rails-base
+          imagePullPolicy: IfNotPresent
+          command: ["bundle", "exec", "rails", "db:migrate"]
+          envFrom:
+            - secretRef:
+                name: secrets
+            - configMapRef:
+                name: config

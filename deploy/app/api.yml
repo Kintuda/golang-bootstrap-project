@@ -17,6 +17,9 @@ spec:
       containers:
         - name: my-app
           image: my-app
+          envFrom:
+            - configMapRef:
+                name: app-config
           ports:
             - containerPort: 8080
           readinessProbe:

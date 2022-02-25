@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  labels:
+    app: app
+data:
+  DATABASE_URL: postgresql://postgres:postgres@postgres:5432/app_db?sslmode=disable  
