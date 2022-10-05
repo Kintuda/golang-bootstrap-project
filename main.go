@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	cmd "github.com/Kintuda/golang-bootstrap-project/cmd/appname"
+	cmd "github.com/Kintuda/golang-bootstrap-project/cmd"
 )
 
 func main() {
