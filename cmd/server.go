@@ -7,10 +7,20 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var ServerCmd = &cobra.Command{
-	Use:   "server",
-	Short: "start appname API",
-	RunE:  startCmd,
+func NewServerCmd() *cobra.Command {
+	rootCmd := &cobra.Command{
+		Use:   "server",
+		Short: "start appname API",
+	}
+
+	listen := &cobra.Command{
+		Use:  "listen",
+		RunE: startCmd,
+	}
+
+	rootCmd.AddCommand(listen)
+
+	return rootCmd
 }
 
 func startCmd(cmd *cobra.Command, arg []string) error {
